@@ -1,0 +1,3 @@
+walbot
+*.json
+!vendor/**/*.json
