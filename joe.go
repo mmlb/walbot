@@ -47,8 +47,7 @@ func main() {
 		}
 	}
 
-	b.Respond(`!make-thinge (.+)`, b.MakeThinge)
-	b.Respond(`\(make-thinge (.+)\)`, b.MakeThinge)
+	b.lispBang(`make-thinge (.+)`, b.MakeThinge)
 
 	err = b.Run()
 	if err != nil {
@@ -76,7 +75,7 @@ func (b *walbot) makeThinge(t string) (string, error) {
 	thinges = append(thinges, t)
 	b.Store.Set("thinges", thinges)
 
-	b.Respond(`\(`+t+`-add (.+)\)`, func(msg joe.Message) error {
+	b.lispBang(t+"-add", func(msg joe.Message) error {
 		thinge := []string{}
 		_, err := b.Store.Get("thinge."+t, &thinge)
 		if err != nil {
@@ -92,7 +91,7 @@ func (b *walbot) makeThinge(t string) (string, error) {
 		msg.Respond("%s added", t)
 		return nil
 	})
-	b.Respond(`\(`+t+`-del (.+)\)`, func(msg joe.Message) error {
+	b.lispBang(t+"-del", func(msg joe.Message) error {
 		thinge := []string{}
 		_, err := b.Store.Get("thinge."+t, &thinge)
 		if err != nil {
@@ -123,7 +122,7 @@ func (b *walbot) makeThinge(t string) (string, error) {
 
 		return nil
 	})
-	get := func(msg joe.Message) error {
+	b.lispBang(t, func(msg joe.Message) error {
 		thinge := []string{}
 		_, err := b.Store.Get("thinge."+t, &thinge)
 		if err != nil {
@@ -137,8 +136,11 @@ func (b *walbot) makeThinge(t string) (string, error) {
 		}
 		msg.Respond("%s", thinge[rand.Int63n(n)])
 		return nil
-	}
-	b.Respond(`\(`+t+`\)`, get)
-	b.Respond(`!`+t, get)
+	})
 	return "thinge created", nil
+}
+
+func (b *walbot) lispBang(pattern string, funk func(joe.Message) error) {
+	b.Respond(`!`+pattern, funk)
+	b.Respond(`\(`+pattern+`\)`, funk)
 }
