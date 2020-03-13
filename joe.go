@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-joe/file-memory"
@@ -49,11 +50,38 @@ func main() {
 
 	b.lispBang(`make-thinge (.+)`, b.MakeThinge)
 	b.lispBang(`overlord`, randomizer(overlord))
+	b.lispBang(`rand ([0-9]+)(?: ([0-9]+))?`, roll)
+	b.lispBang(`roll ([0-9]+)(?: ([0-9]+))?`, roll)
 
 	err = b.Run()
 	if err != nil {
 		b.Logger.Fatal(err.Error())
 	}
+}
+
+func roll(msg joe.Message) error {
+	max, err := strconv.Atoi(msg.Matches[0])
+	if err != nil {
+		msg.Respond("could not parse stop value")
+		return err
+	}
+	if max < 1 {
+		msg.Respond("max must be greater than 0")
+		return nil
+	}
+
+	count := 1
+	if msg.Matches[1] != "" {
+		count, err = strconv.Atoi(msg.Matches[1])
+		if err != nil {
+			msg.Respond("could not parse count value")
+			return err
+		}
+	}
+	for i := 0; i < count; i++ {
+		msg.Respond("%d", rand.Intn(max)+1)
+	}
+	return nil
 }
 
 func randomizer(items []string) func(joe.Message) error {
