@@ -48,6 +48,7 @@ func main() {
 		}
 	}
 
+	b.lispBang(`magic8ball .*\?`, randomizer(magic8ball))
 	b.lispBang(`make-thinge (.+)`, b.MakeThinge)
 	b.lispBang(`overlord`, randomizer(overlord))
 	b.lispBang(`rand ([0-9]+)(?: ([0-9]+))?`, roll)
