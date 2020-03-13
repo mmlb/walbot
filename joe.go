@@ -48,10 +48,19 @@ func main() {
 	}
 
 	b.lispBang(`make-thinge (.+)`, b.MakeThinge)
+	b.lispBang(`overlord`, randomizer(overlord))
 
 	err = b.Run()
 	if err != nil {
 		b.Logger.Fatal(err.Error())
+	}
+}
+
+func randomizer(items []string) func(joe.Message) error {
+	n := int64(len(items))
+	return func(msg joe.Message) error {
+		msg.Respond("%s", items[rand.Int63n(n)])
+		return nil
 	}
 }
 
