@@ -178,7 +178,7 @@ func (b *walbot) makeThinge(t string) (string, error) {
 	return "thinge created", nil
 }
 
-func (b *walbot) lispBang(pattern string, funk func(joe.Message) error) {
-	b.Respond(`!`+pattern, funk)
-	b.Respond(`\(`+pattern+`\)`, funk)
+func (b *walbot) lispBang(pattern string, fn func(joe.Message) error) {
+	b.Respond(`!`+pattern, fn)
+	b.Respond(`\(`+pattern+`\)`, fn)
 }
