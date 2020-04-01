@@ -25,7 +25,7 @@ func main() {
 	var j *joe.Bot
 	if slackToken != "" {
 		j = joe.New("walbot",
-			slack.Adapter(slackToken),
+			slack.Adapter(slackToken, slack.WithListenPassive()),
 			file.Memory("walbot.json"))
 	} else {
 		j = joe.New("walbot",
