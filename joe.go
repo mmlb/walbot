@@ -113,7 +113,7 @@ func (b *walbot) makeThinge(t string) (string, error) {
 	thinges = append(thinges, t)
 	b.Store.Set("thinges", thinges)
 
-	b.lispBang(t+"-add", func(msg joe.Message) error {
+	b.lispBang(t+`-add \s*(.+)\s*`, func(msg joe.Message) error {
 		thinge := []string{}
 		_, err := b.Store.Get("thinge."+t, &thinge)
 		if err != nil {
@@ -129,7 +129,7 @@ func (b *walbot) makeThinge(t string) (string, error) {
 		msg.Respond("%s added", t)
 		return nil
 	})
-	b.lispBang(t+"-del", func(msg joe.Message) error {
+	b.lispBang(t+`-del \s*(.+)\s*`, func(msg joe.Message) error {
 		thinge := []string{}
 		_, err := b.Store.Get("thinge."+t, &thinge)
 		if err != nil {
