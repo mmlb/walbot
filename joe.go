@@ -49,6 +49,8 @@ func main() {
 		}
 	}
 
+	go setupDongerlist(b)
+
 	b.lispBang(`list-thinges`, func(msg joe.Message) error {
 		thinges := []string{}
 		ok, err := b.Store.Get("thinges", &thinges)
