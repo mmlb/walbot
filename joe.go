@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-joe/file-memory"
@@ -16,8 +18,6 @@ import (
 type walbot struct {
 	*joe.Bot
 }
-
-type thinge []string
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -31,6 +31,7 @@ func main() {
 		j = joe.New("walbot",
 			file.Memory("walbot.json"))
 	}
+
 	b := &walbot{Bot: j}
 
 	thinges := []string{}
@@ -48,6 +49,22 @@ func main() {
 		}
 	}
 
+	go setupDongerlist(b)
+
+	b.lispBang(`list-thinges`, func(msg joe.Message) error {
+		thinges := []string{}
+		ok, err := b.Store.Get("thinges", &thinges)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			msg.Respond("no thinges defined yet... wat!")
+			return nil
+		}
+		sort.Strings(thinges)
+		msg.Respond(fmt.Sprintf("known thinges:\n%s", strings.Join(thinges, "\n")))
+		return nil
+	})
 	b.lispBang(`magic8ball .*\?`, randomizer(magic8ball))
 	b.lispBang(`make-thinge (.+)`, b.MakeThinge)
 	b.lispBang(`overlord`, randomizer(overlord))
@@ -94,8 +111,17 @@ func randomizer(items []string) func(joe.Message) error {
 	}
 }
 
+var errThingeExists = fmt.Errorf("thinge already exists")
+
 func (b *walbot) MakeThinge(msg joe.Message) error {
-	resp, err := b.makeThinge(msg.Matches[0])
+	thinge := msg.Matches[0]
+
+	resp, err := b.makeThinge(thinge)
+	if errors.Is(err, errThingeExists) {
+		msg.Respond(fmt.Sprintf("thinge %q already exists", thinge))
+		return nil
+	}
+
 	msg.Respond(resp)
 	return err
 }
@@ -108,7 +134,7 @@ func (b *walbot) makeThinge(t string) (string, error) {
 	}
 	for _, v := range thinges {
 		if v == t {
-			return fmt.Sprintf("thinge %s is already defined", t), nil
+			return "", errThingeExists
 		}
 	}
 	thinges = append(thinges, t)
