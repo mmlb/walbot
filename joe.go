@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-joe/file-memory"
@@ -47,6 +49,20 @@ func main() {
 		}
 	}
 
+	b.lispBang(`list-thinges`, func(msg joe.Message) error {
+		thinges := []string{}
+		ok, err := b.Store.Get("thinges", &thinges)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			msg.Respond("no thinges defined yet... wat!")
+			return nil
+		}
+		sort.Strings(thinges)
+		msg.Respond(fmt.Sprintf("known thinges:\n%s", strings.Join(thinges, "\n")))
+		return nil
+	})
 	b.lispBang(`magic8ball .*\?`, randomizer(magic8ball))
 	b.lispBang(`make-thinge (.+)`, b.MakeThinge)
 	b.lispBang(`overlord`, randomizer(overlord))
