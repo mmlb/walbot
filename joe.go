@@ -109,8 +109,17 @@ func randomizer(items []string) func(joe.Message) error {
 	}
 }
 
+var errThingeExists = fmt.Errorf("thinge already exists")
+
 func (b *walbot) MakeThinge(msg joe.Message) error {
-	resp, err := b.makeThinge(msg.Matches[0])
+	thinge := msg.Matches[0]
+
+	resp, err := b.makeThinge(thinge)
+	if errors.Is(err, errThingeExists) {
+		msg.Respond(fmt.Sprintf("thinge %q already exists", thinge))
+		return nil
+	}
+
 	msg.Respond(resp)
 	return err
 }
@@ -123,7 +132,7 @@ func (b *walbot) makeThinge(t string) (string, error) {
 	}
 	for _, v := range thinges {
 		if v == t {
-			return fmt.Sprintf("thinge %s is already defined", t), nil
+			return "", errThingeExists
 		}
 	}
 	thinges = append(thinges, t)
