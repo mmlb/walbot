@@ -17,8 +17,6 @@ type walbot struct {
 	*joe.Bot
 }
 
-type thinge []string
-
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	slackToken := os.Getenv("SLACK_TOKEN")
@@ -31,6 +29,7 @@ func main() {
 		j = joe.New("walbot",
 			file.Memory("walbot.json"))
 	}
+
 	b := &walbot{Bot: j}
 
 	thinges := []string{}
