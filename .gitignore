@@ -1,3 +1,9 @@
-walbot
 *.json
-!vendor/**/*.json
+.direnv/
+result
+walbot
+
+# Devenv
+.devenv*
+devenv.local.nix
+.pre-commit-config.yaml
