@@ -20,7 +20,7 @@ func parseFrontPage() map[string]bool {
 
 	categories := map[string]bool{}
 	c.OnHTML("option", func(e *colly.HTMLElement) {
-		//fmt.Println(strings.ToLower(e.Text), e.Attr("value"))
+		// fmt.Println(strings.ToLower(e.Text), e.Attr("value"))
 		value := e.Attr("value")
 		if !catRe.MatchString(value) {
 			return
