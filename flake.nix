@@ -24,23 +24,20 @@
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # Generate a user-friendly version number.
-        version = builtins.substring 0 8 self.lastModifiedDate;
-      in rec {
-        # Provide some binary packages for selected system types.
         packages = flake-utils.lib.flattenTree {
           walbot = pkgs.buildGoModule {
             pname = "walbot";
-            version = version;
+            version = builtins.substring 0 8 self.lastModifiedDate;
             # In 'nix develop', we don't need a copy of the source tree
             # in the Nix store.
             src = ./.;
             vendorHash = "sha256-8HfaR3McfaELatGYf1vyQZGBZcuBSnQdahM63muWwPs=";
           };
         };
+      in {
+        # Provide some binary packages for selected system types.
+        defaultApp = flake-utils.lib.mkApp {drv = packages.walbot;};
         defaultPackage = packages.walbot;
-        apps.walbot = flake-utils.lib.mkApp {drv = packages.walbot;};
-        defaultApp = apps.walbot;
         devShell = devenv.lib.mkShell {
           inherit inputs pkgs;
           modules = [./devenv.nix];
