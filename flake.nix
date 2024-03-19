@@ -7,29 +7,22 @@
   };
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-unstable";
-
-    devenv.url = "github:cachix/devenv/latest";
+    devenv.url = "github:cachix/devenv";
     devenv.inputs.nixpkgs.follows = "nixpkgs";
-    devshell.inputs.flake-utils.follows = "flake-utils";
-    devshell.inputs.nixpkgs.follows = "nixpkgs";
-    devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
-  outputs = {
+  outputs = inputs @ {
     self,
-    nixpkgs,
     devenv,
-    devshell,
     flake-utils,
-  } @ inputs:
+    nixpkgs,
+    ...
+  }:
     flake-utils.lib.eachDefaultSystem (
       system: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [devshell.overlays.default];
-        };
+        pkgs = nixpkgs.legacyPackages.${system};
 
         # Generate a user-friendly version number.
         version = builtins.substring 0 8 self.lastModifiedDate;
@@ -38,19 +31,19 @@
         packages = flake-utils.lib.flattenTree {
           walbot = pkgs.buildGoModule {
             pname = "walbot";
-            inherit version;
+            version = version;
             # In 'nix develop', we don't need a copy of the source tree
             # in the Nix store.
             src = ./.;
-            vendorSha256 = "sha256-ur2iBQayIBEdrEn4PvLOhuiEm9RFugVywNaXnYHYjZQ=";
+            vendorHash = "sha256-8HfaR3McfaELatGYf1vyQZGBZcuBSnQdahM63muWwPs=";
           };
         };
         defaultPackage = packages.walbot;
         apps.walbot = flake-utils.lib.mkApp {drv = packages.walbot;};
         defaultApp = apps.walbot;
-        devShell = pkgs.devshell.mkShell {
-          motd = "";
-          packages = [devenv.packages.${system}.devenv];
+        devShell = devenv.lib.mkShell {
+          inherit inputs pkgs;
+          modules = [./devenv.nix];
         };
       }
     );
