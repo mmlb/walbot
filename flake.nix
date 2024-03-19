@@ -28,10 +28,9 @@
           walbot = pkgs.buildGoModule {
             pname = "walbot";
             version = builtins.substring 0 8 self.lastModifiedDate;
-            # In 'nix develop', we don't need a copy of the source tree
-            # in the Nix store.
+            # In 'nix develop', we don't need a copy of the source tree in the Nix store.
             src = ./.;
-            vendorHash = "sha256-8HfaR3McfaELatGYf1vyQZGBZcuBSnQdahM63muWwPs=";
+            vendorHash = "sha256-LLw8+Aws1VFdr8hI6+0BiOH6DQY2pLYotLoHMPto4SQ=";
           };
         };
       in {
